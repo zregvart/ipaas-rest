@@ -7,7 +7,7 @@ node {
     echo "Using branch: ${branch}."
 
     slave(namespace: 'syndesis') {
-        withOpenshift {
+        withOpenshift(namespace: 'syndesis') {
             withMaven(
                 mavenImage: "maven:${mavenVersion}",
                 envVars: [
