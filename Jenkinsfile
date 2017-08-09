@@ -6,7 +6,7 @@ node {
     def branch = "${env.BRANCH_NAME}"
     echo "Using branch: ${branch}."
 
-    slave {
+    slave(namespace: 'syndesis') {
         withOpenshift {
             withMaven(
                 mavenImage: "maven:${mavenVersion}",
