@@ -31,12 +31,14 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheFactory;
-import io.syndesis.connector.catalog.ConnectorCatalog;
+
 import io.syndesis.integration.model.Flow;
 import io.syndesis.integration.model.SyndesisHelpers;
 import io.syndesis.integration.model.SyndesisModel;
@@ -50,10 +52,9 @@ import io.syndesis.project.converter.visitor.StepVisitor;
 import io.syndesis.project.converter.visitor.StepVisitorContext;
 import io.syndesis.project.converter.visitor.StepVisitorFactory;
 import io.syndesis.project.converter.visitor.StepVisitorFactoryRegistry;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class DefaultProjectGenerator implements ProjectGenerator {
 
@@ -68,7 +69,6 @@ public class DefaultProjectGenerator implements ProjectGenerator {
         "pom.xml"
     );
     */
-    private final ConnectorCatalog connectorCatalog;
     private final ProjectGeneratorProperties generatorProperties;
     private final StepVisitorFactoryRegistry registry;
     private final Mustache readmeMustache;
@@ -78,8 +78,7 @@ public class DefaultProjectGenerator implements ProjectGenerator {
 
     private static final Logger LOG = LoggerFactory.getLogger(DefaultProjectGenerator.class);
 
-    public DefaultProjectGenerator(ConnectorCatalog connectorCatalog, ProjectGeneratorProperties generatorProperties, StepVisitorFactoryRegistry registry) throws IOException {
-        this.connectorCatalog = connectorCatalog;
+    public DefaultProjectGenerator(ProjectGeneratorProperties generatorProperties, StepVisitorFactoryRegistry registry) throws IOException {
         this.generatorProperties = generatorProperties;
         this.registry = registry;
         this.readmeMustache = compile(generatorProperties, "README.md.mustache", "README.md");
@@ -114,15 +113,6 @@ public class DefaultProjectGenerator implements ProjectGenerator {
 
     @Override
     public Map<String, byte[]> generate(GenerateProjectRequest request) throws IOException {
-        request.getIntegration().getSteps().ifPresent(steps -> {
-            for (Step step : steps) {
-                LOG.info("Integration {} : Adding step {} ",
-                         request.getIntegration().getId().orElse("[none]"),
-                         step.getId().orElse(""));
-                step.getAction().ifPresent(action -> connectorCatalog.addConnector(action.getCamelConnectorGAV()));
-            }
-        });
-
         Map<String, byte[]> contents = new HashMap<>();
 
         for (Templates.Resource additionalResource : generatorProperties.getTemplates().getAdditionalResources()) {
@@ -190,7 +180,6 @@ public class DefaultProjectGenerator implements ProjectGenerator {
             Step first = remaining.remove();
             if (first != null) {
                 GeneratorContext generatorContext = new GeneratorContext.Builder()
-                    .connectorCatalog(connectorCatalog)
                     .generatorProperties(generatorProperties)
                     .request(request)
                     .contents(contents)

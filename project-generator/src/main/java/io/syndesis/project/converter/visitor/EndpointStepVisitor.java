@@ -33,6 +33,8 @@ import io.syndesis.model.connection.Connector;
 import io.syndesis.model.integration.Step;
 import io.syndesis.project.converter.GenerateProjectRequest;
 
+import org.springframework.web.util.UriComponentsBuilder;
+
 public class EndpointStepVisitor implements StepVisitor {
     private final GeneratorContext generatorContext;
 
@@ -125,8 +127,8 @@ public class EndpointStepVisitor implements StepVisitor {
         return createEndpoint(camelConnectorPrefix, connectorScheme, properties);
     }
 
-    private Endpoint createEndpoint(String camelConnectorPrefix, String connectorScheme, Map<String, String> endpointOptions) throws URISyntaxException {
-        String endpointUri = generatorContext.getConnectorCatalog().buildEndpointUri(camelConnectorPrefix, endpointOptions);
+    private Endpoint createEndpoint(String camelConnectorPrefix, String connectorScheme, Map<String, String> endpointOptions) {
+        String endpointUri = buildEndpointUri(camelConnectorPrefix, endpointOptions);
 
         if (endpointUri.startsWith(camelConnectorPrefix) && !camelConnectorPrefix.equals(connectorScheme)) {
             String remaining = endpointUri.substring(camelConnectorPrefix.length());
@@ -139,6 +141,13 @@ public class EndpointStepVisitor implements StepVisitor {
         }
 
         return new Endpoint(endpointUri);
+    }
+
+    private static String buildEndpointUri(String camelConnectorPrefix, Map<String, String> endpointOptions) {
+        final UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromUriString(camelConnectorPrefix);
+        endpointOptions.forEach((k, v) -> uriBuilder.queryParam(k, v));
+
+        return uriBuilder.build().toString();
     }
 
     private static Map<String, String> aggregate(Map<String, String> ... maps) throws IOException {

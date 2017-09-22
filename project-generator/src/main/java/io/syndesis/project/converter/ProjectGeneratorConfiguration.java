@@ -18,13 +18,13 @@ package io.syndesis.project.converter;
 import java.io.IOException;
 import java.util.List;
 
-import io.syndesis.connector.catalog.ConnectorCatalog;
 import io.syndesis.project.converter.visitor.DataMapperStepVisitor;
 import io.syndesis.project.converter.visitor.EndpointStepVisitor;
 import io.syndesis.project.converter.visitor.ExpressionFilterStepVisitor;
 import io.syndesis.project.converter.visitor.RuleFilterStepVisitor;
 import io.syndesis.project.converter.visitor.StepVisitorFactory;
 import io.syndesis.project.converter.visitor.StepVisitorFactoryRegistry;
+
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -34,8 +34,8 @@ import org.springframework.context.annotation.Configuration;
 public class ProjectGeneratorConfiguration {
 
     @Bean
-    public ProjectGenerator projectConverter(ConnectorCatalog connectorCatalog, ProjectGeneratorProperties properties, StepVisitorFactoryRegistry registry) throws IOException {
-        return new DefaultProjectGenerator(connectorCatalog, properties, registry);
+    public ProjectGenerator projectConverter(ProjectGeneratorProperties properties, StepVisitorFactoryRegistry registry) throws IOException {
+        return new DefaultProjectGenerator(properties, registry);
     }
 
     @Bean

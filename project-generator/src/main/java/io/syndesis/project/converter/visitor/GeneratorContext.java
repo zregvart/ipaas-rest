@@ -17,7 +17,6 @@
 package io.syndesis.project.converter.visitor;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import io.syndesis.connector.catalog.ConnectorCatalog;
 import io.syndesis.integration.model.Flow;
 import io.syndesis.project.converter.GenerateProjectRequest;
 import io.syndesis.project.converter.ProjectGeneratorProperties;
@@ -35,7 +34,6 @@ public class GeneratorContext {
     private final GenerateProjectRequest request;
     private final Flow flow;
     private final Map<String, byte[]> contents;
-    private final ConnectorCatalog connectorCatalog;
     private final ProjectGeneratorProperties generatorProperties;
     private final StepVisitorFactoryRegistry visitorFactoryRegistry;
 
@@ -44,7 +42,6 @@ public class GeneratorContext {
         private GenerateProjectRequest request;
         private Flow flow;
         private Map<String, byte[]> contents;
-        private ConnectorCatalog connectorCatalog;
         private ProjectGeneratorProperties generatorProperties;
         private StepVisitorFactoryRegistry visitorFactoryRegistry;
 
@@ -63,11 +60,6 @@ public class GeneratorContext {
             return this;
         }
 
-        public Builder connectorCatalog(ConnectorCatalog connectorCatalog) {
-            this.connectorCatalog = connectorCatalog;
-            return this;
-        }
-
         public Builder generatorProperties(ProjectGeneratorProperties projectGeneratorProperties) {
             this.generatorProperties = projectGeneratorProperties;
             return this;
@@ -79,7 +71,7 @@ public class GeneratorContext {
         }
 
         public GeneratorContext build() {
-            return new GeneratorContext(request, flow, contents, connectorCatalog, generatorProperties, visitorFactoryRegistry);
+            return new GeneratorContext(request, flow, contents, generatorProperties, visitorFactoryRegistry);
         }
     }
 
@@ -87,11 +79,10 @@ public class GeneratorContext {
         return new GeneratorContext.Builder();
     }
 
-    GeneratorContext(GenerateProjectRequest request, Flow flow, Map<String, byte[]> contents, ConnectorCatalog connectorCatalog, ProjectGeneratorProperties generatorProperties, StepVisitorFactoryRegistry visitorFactoryRegistry) {
+    GeneratorContext(GenerateProjectRequest request, Flow flow, Map<String, byte[]> contents, ProjectGeneratorProperties generatorProperties, StepVisitorFactoryRegistry visitorFactoryRegistry) {
         this.request = request;
         this.flow = flow;
         this.contents = contents;
-        this.connectorCatalog = connectorCatalog;
         this.generatorProperties = generatorProperties;
         this.visitorFactoryRegistry = visitorFactoryRegistry;
     }
@@ -106,10 +97,6 @@ public class GeneratorContext {
 
     public Map<String, byte[]> getContents() {
         return contents;
-    }
-
-    public ConnectorCatalog getConnectorCatalog() {
-        return connectorCatalog;
     }
 
     public ProjectGeneratorProperties getGeneratorProperties() {

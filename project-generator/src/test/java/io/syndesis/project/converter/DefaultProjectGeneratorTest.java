@@ -33,8 +33,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
-import io.syndesis.connector.catalog.ConnectorCatalog;
-import io.syndesis.connector.catalog.ConnectorCatalogProperties;
 import io.syndesis.integration.support.Strings;
 import io.syndesis.model.connection.Action;
 import io.syndesis.model.connection.Connection;
@@ -60,7 +58,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(Parameterized.class)
 public class DefaultProjectGeneratorTest {
-    private static final ConnectorCatalogProperties CATALOG_PROPERTIES = new ConnectorCatalogProperties();
     private static Properties properties = new Properties();
     private static final ObjectMapper OBJECT_MAPPER;
     private static final TypeReference<HashMap<String, Connector>> CONNECTOR_MAP_TYPE_REF;
@@ -83,11 +80,6 @@ public class DefaultProjectGeneratorTest {
             OBJECT_MAPPER = new ObjectMapper().registerModule(new Jdk8Module());
             CONNECTOR_MAP_TYPE_REF = new TypeReference<HashMap<String, Connector>>() {
             };
-            final Map<String, String> repositories = new HashMap<>();
-            repositories.put("maven.central", "https://repo1.maven.org/maven2");
-            repositories.put("redhat.ga", "https://maven.repository.redhat.com/ga");
-            repositories.put("jboss.ea", "https://repository.jboss.org/nexus/content/groups/ea");
-            CATALOG_PROPERTIES.setMavenRepos(repositories);
     }
 
     @Parameterized.Parameters
@@ -185,7 +177,7 @@ public class DefaultProjectGeneratorTest {
         generatorProperties.getTemplates().setOverridePath(this.basePath);
         generatorProperties.getTemplates().getAdditionalResources().addAll(this.additionalResources);
 
-        Map<String, byte[]> files = new DefaultProjectGenerator(new ConnectorCatalog(CATALOG_PROPERTIES), generatorProperties, registry).generate(request);
+        Map<String, byte[]> files = new DefaultProjectGenerator(generatorProperties, registry).generate(request);
 
         assertFileContents(generatorProperties, files.get("README.md"), "test-README.md");
         assertFileContents(generatorProperties, files.get("src/main/java/io/syndesis/example/Application.java"), "test-Application.java");
@@ -246,7 +238,7 @@ public class DefaultProjectGeneratorTest {
         generatorProperties.getTemplates().getAdditionalResources().addAll(this.additionalResources);
         generatorProperties.setSecretMaskingEnabled(true);
 
-        Map<String, byte[]> files = new DefaultProjectGenerator(new ConnectorCatalog(CATALOG_PROPERTIES), generatorProperties, registry).generate(request);
+        Map<String, byte[]> files = new DefaultProjectGenerator(generatorProperties, registry).generate(request);
 
         assertFileContents(generatorProperties, files.get("src/main/resources/application.properties"), "test-application.properties");
         assertFileContents(generatorProperties, files.get("src/main/resources/syndesis.yml"), "test-syndesis-with-secrets.yml");
@@ -269,7 +261,7 @@ public class DefaultProjectGeneratorTest {
         generatorProperties.getTemplates().setOverridePath(this.basePath);
         generatorProperties.getTemplates().getAdditionalResources().addAll(this.additionalResources);
 
-        Map<String, byte[]> files = new DefaultProjectGenerator(new ConnectorCatalog(CATALOG_PROPERTIES), generatorProperties, registry).generate(request);
+        Map<String, byte[]> files = new DefaultProjectGenerator(generatorProperties, registry).generate(request);
 
         assertFileContents(generatorProperties, files.get("README.md"), "test-pull-push-README.md");
         assertFileContents(generatorProperties, files.get("src/main/java/io/syndesis/example/Application.java"), "test-Application.java");
@@ -326,7 +318,7 @@ public class DefaultProjectGeneratorTest {
         generatorProperties.getTemplates().setOverridePath(this.basePath);
         generatorProperties.getTemplates().getAdditionalResources().addAll(this.additionalResources);
 
-        Map<String, byte[]> files = new DefaultProjectGenerator(new ConnectorCatalog(CATALOG_PROPERTIES), generatorProperties, registry).generate(request);
+        Map<String, byte[]> files = new DefaultProjectGenerator(generatorProperties, registry).generate(request);
 
         assertFileContents(generatorProperties, files.get("src/main/resources/syndesis.yml"), "test-mapper-syndesis.yml");
         assertThat(new String(files.get("src/main/resources/mapping-step-2.json"))).isEqualTo("{}");
@@ -386,7 +378,7 @@ public class DefaultProjectGeneratorTest {
         generatorProperties.getTemplates().setOverridePath(this.basePath);
         generatorProperties.getTemplates().getAdditionalResources().addAll(this.additionalResources);
 
-        Map<String, byte[]> files = new DefaultProjectGenerator(new ConnectorCatalog(CATALOG_PROPERTIES), generatorProperties, registry).generate(request);
+        Map<String, byte[]> files = new DefaultProjectGenerator(generatorProperties, registry).generate(request);
 
         assertFileContents(generatorProperties, files.get("src/main/resources/syndesis.yml"), "test-filter-syndesis.yml");
     }
