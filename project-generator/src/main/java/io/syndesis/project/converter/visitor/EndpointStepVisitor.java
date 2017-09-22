@@ -19,7 +19,9 @@ package io.syndesis.project.converter.visitor;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -124,11 +126,11 @@ public class EndpointStepVisitor implements StepVisitor {
             properties.put("timerName", "every");
         }
 
-        return createEndpoint(camelConnectorPrefix, connectorScheme, properties);
+        return createEndpoint(action, camelConnectorPrefix, connectorScheme, properties);
     }
 
-    private Endpoint createEndpoint(String camelConnectorPrefix, String connectorScheme, Map<String, String> endpointOptions) {
-        String endpointUri = buildEndpointUri(camelConnectorPrefix, endpointOptions);
+    private Endpoint createEndpoint(Action action, String camelConnectorPrefix, String connectorScheme, Map<String, String> endpointOptions) {
+        String endpointUri = buildEndpointUri(action, camelConnectorPrefix, endpointOptions);
 
         if (endpointUri.startsWith(camelConnectorPrefix) && !camelConnectorPrefix.equals(connectorScheme)) {
             String remaining = endpointUri.substring(camelConnectorPrefix.length());
@@ -143,8 +145,23 @@ public class EndpointStepVisitor implements StepVisitor {
         return new Endpoint(endpointUri);
     }
 
-    private static String buildEndpointUri(String camelConnectorPrefix, Map<String, String> endpointOptions) {
-        final UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromUriString(camelConnectorPrefix);
+    private static String buildEndpointUri(Action action, String camelConnectorPrefix, Map<String, String> endpointOptions) {
+        final StringBuilder template = new StringBuilder(camelConnectorPrefix);
+
+        final Map<String, String> parameters = new HashMap<>(endpointOptions);
+        action.getDefinition().getPropertyDefinitionSteps().forEach(step -> step.getProperties().forEach((property, propertyDefinition) -> {
+            if (Boolean.TRUE.equals(propertyDefinition.getRequired()) && !parameters.containsKey(property)) {
+                parameters.put(property, Optional.ofNullable(propertyDefinition.getDefaultValue()).orElse(""));
+            }
+
+            if ("path".equals(propertyDefinition.getKind())) {
+                template.append(':');
+                template.append(parameters.get(property));
+                parameters.remove(property);
+            }
+        }));
+
+        final UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromUriString(template.toString());
         endpointOptions.forEach((k, v) -> uriBuilder.queryParam(k, v));
 
         return uriBuilder.build().toString();
