@@ -134,7 +134,7 @@
     <spring-cloud.version>Dalston.SR2</spring-cloud.version>
     <spring-cloud-kubernetes.version>0.1.6</spring-cloud-kubernetes.version>
     <spring-cloud-sleuth.version>1.2.2.RELEASE</spring-cloud-sleuth.version>
-    <spring-security.version>4.2.3.RELEASE</spring-security.version>
+    <spring-security.version>5.4.5</spring-security.version>
     <spring-social.version>1.1.4.RELEASE</spring-social.version>
     <swagger.version>1.5.12</swagger.version>
     <undertow.version>1.4.18.Final</undertow.version>
